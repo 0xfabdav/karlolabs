@@ -14,26 +14,163 @@
 
 <body>
   <main class="stage" aria-label="KarloLabs landing page">
-    <section class="stack" aria-label="KarloLabs headline">
-      <div class="row justified">
-        <p class="pill violet">We build</p>
-        <p class="pill orange">software for</p>
-      </div>
-      <div class="row justified">
-        <p class="pill yellow wide">startups and serious teams.</p>
-      </div>
-      <div class="row brand-line">
-        <img src="public/logoK.png" alt="KarloLabs logo" class="logo" />
-        <p class="pill pink">KarloLabs</p>
+
+
+    <section class="hero" aria-label="KarloLabs headline and contact">
+      <section class="stack" aria-label="KarloLabs headline">
+        <div class="row justified">
+          <p class="pill violet">We build</p>
+          <p class="pill orange">software for</p>
+        </div>
+        <div class="row justified">
+          <p class="pill yellow wide">startups and serious teams.</p>
+        </div>
+        <div class="row brand-line">
+          <img src="public/logoK.png" alt="KarloLabs logo" class="logo" />
+          <p class="pill pink">KarloLabs</p>
+        </div>
+      </section>
+
+      <nav class="row actions" aria-label="Contact KarloLabs">
+        <a class="pill dark action" href="mailto:info@karlolabs.com">info@karlolabs.com</a>
+        <a class="pill light action" href="https://www.linkedin.com/company/karlolabs" target="_blank"
+          rel="noreferrer">LinkedIn</a>
+      </nav>
+    </section>
+
+
+    <section class="showcase" aria-label="Project showcase">
+      <aside class="project-rail" aria-label="Projects list">
+        <div class="rail-controls" aria-hidden="true">
+          <button class="rail-btn rail-btn-up" type="button" aria-label="Scroll projects up">&#9650;</button>
+          <button class="rail-btn rail-btn-down" type="button" aria-label="Scroll projects down">&#9660;</button>
+        </div>
+
+        <div id="hidden-scroller" tabindex="0" style="overflow-y: scroll;position: absolute;height: 10px">
+          <div style="position: relative;background-color: white; height: 400px;width: 50px; opacity: 0;">
+          </div>
+        </div>
+
+        <div class="project-scroll" aria-label="Scroll through projects">
+          <button class="project-item active" type="button" data-preview="rings">
+            <span class="project-title">Cheflink</span>
+            <span class="project-copy">Menu operations dashboard</span>
+          </button>
+          <button class="project-item" type="button" data-preview="bars">
+            <span class="project-title">Quoty</span>
+            <span class="project-copy">heres the project description</span>
+          </button>
+          <button class="project-item" type="button" data-preview="ui">
+            <span class="project-title">SupplyChain</span>
+            <span class="project-copy">beschreibung hier einfügen</span>
+          </button>
+          <button class="project-item" type="button" data-preview="cards">
+            <span class="project-title">Projekt 4</span>
+            <span class="project-copy">Warehouse planning panel</span>
+          </button>
+        </div>
+      </aside>
+
+      <div class="preview-frame" aria-hidden="true">
+        <div class="preview-panel preview-rings active" data-preview="rings">
+          <img class="preview-image" src="public/cheflink.png" alt="Cheflink project preview" />
+        </div>
+
+        <div class="preview-panel preview-bars" data-preview="bars">
+          <img class="preview-image" src="public/quoty.jpg" alt="Quoty project preview" />
+        </div>
+
+        <div class="preview-panel preview-ui" data-preview="ui">
+          <img class="preview-image" src="public/supplychain.png" alt="SupplyChain project preview" />
+        </div>
+
+        <div class="preview-panel preview-cards" data-preview="cards">
+          <img class="preview-image" src="public/projekt4.png" alt="Projekt 4 preview" />
+        </div>
       </div>
     </section>
 
-    <nav class="row actions" aria-label="Contact KarloLabs">
-      <a class="pill dark action" href="mailto:info@karlolabs.com">info@karlolabs.com</a>
-      <a class="pill light action" href="https://www.linkedin.com/company/karlolabs" target="_blank"
-        rel="noreferrer">LinkedIn</a>
-    </nav>
+    <div class="scroll-meter" aria-hidden="true">
+      <div class="scroll-meter-track"></div>
+      <div class="scroll-meter-marker"></div>
+    </div>
+
+
   </main>
+
+  <script>
+    (() => {
+      const stage = document.querySelector('.stage');
+      const rail = document.querySelector('.project-rail');
+      const scroller = document.querySelector('.project-scroll');
+      const panels = Array.from(document.querySelectorAll('.preview-panel'));
+      const meter = document.querySelector('.scroll-meter');
+      const hiddenScroller = document.querySelector('#hidden-scroller');
+      const railUpButton = document.querySelector('.rail-btn-up');
+      const railDownButton = document.querySelector('.rail-btn-down');
+
+      const items = Array.from(scroller.querySelectorAll('.project-item'));
+      let virtualProgress = 0;
+      let virtualScroll = 0;
+
+      const clamp01 = (value) => Math.min(1, Math.max(0, value));
+
+      const maxScroll = 400;
+
+      const setActive = (item) => {
+        items.forEach((entry) => entry.classList.remove('active'));
+        item.classList.add('active');
+
+        const top = item.offsetTop;
+        const height = item.offsetHeight;
+
+        const previewKey = item.getAttribute('data-preview');
+        panels.forEach((panel) => {
+          panel.classList.toggle('active', panel.getAttribute('data-preview') === previewKey);
+        });
+      };
+
+      const setProgress = (nextProgress) => {
+        const progress = clamp01(nextProgress);
+        virtualProgress = progress;
+
+        const index = Math.min(items.length - 1, Math.floor(progress * items.length));
+        const active = items[Math.max(0, index)];
+        setActive(active);
+
+        meter.style.setProperty('--meter-progress', String(progress));
+        rail.style.setProperty('--active-top', String(progress));
+
+        scroller.scrollTop = progress * maxScroll;
+      };
+
+
+      const scrollProjects = (deltaY) => {
+        virtualScroll = Math.min(maxScroll, Math.max(0, virtualScroll + deltaY));
+        console.log(virtualScroll)
+        setProgress(virtualProgress + deltaY / maxScroll);
+      };
+
+
+      stage.addEventListener('wheel', (event) => {
+        event.preventDefault()
+        scrollProjects(event.deltaY >= 0 ? 10 : -10);
+      }, {passive: false});
+
+      railUpButton.addEventListener('click', () => {
+        if (virtualScroll + -1 * maxScroll / items.length >= 0)
+          scrollProjects(-1 * maxScroll / items.length);
+      });
+
+      railDownButton.addEventListener('click', () => {
+        if (virtualScroll + maxScroll / items.length < maxScroll)
+          scrollProjects(maxScroll / items.length);
+      });
+
+      setProgress(0);
+
+    })();
+  </script>
 </body>
 
 </html>
