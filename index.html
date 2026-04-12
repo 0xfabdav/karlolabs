@@ -147,7 +147,6 @@
 
       const scrollProjects = (deltaY) => {
         virtualScroll = Math.min(maxScroll, Math.max(0, virtualScroll + deltaY));
-        console.log(virtualScroll)
         setProgress(virtualProgress + deltaY / maxScroll);
       };
 
