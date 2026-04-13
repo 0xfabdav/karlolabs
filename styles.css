@@ -67,6 +67,18 @@ button:focus {
   outline: none;
 }
 
+#hidden-scroller {
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox, Safari 18.2+, Chromium 121+ */
+}
+
+#hidden-scroller::-webkit-scrollbar {
+  display: none;
+  /* Older Safari and Chromium */
+}
+
 .scroll-meter-track {
   position: absolute;
   inset: 0;
